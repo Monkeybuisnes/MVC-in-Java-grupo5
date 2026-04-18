@@ -1,0 +1,95 @@
+classDiagram
+
+class Main {
+  +main(String[] args) void
+}
+
+class Controller {
+  <<abstract>>
+  +run() void
+}
+
+class Model {
+  <<interface>>
+  +attach(View view) void
+  +detach(View view) void
+  +notifyViews() void
+}
+
+class View {
+  <<interface>>
+  +update(Model model, Object data) void
+}
+
+class HomeController {
+  +run() void
+  +getEventListView() EventListView
+  +getNewEventView() NewEventView
+  +getGuestView() GuestView
+}
+
+class NewEventController {
+  +run() void
+  +addEvent(SchedulerEvent event) void
+  +getView() NewEventView
+}
+
+class EventListController {
+  +run() void
+  +addNewRow(Object[] values) void
+  +deleteSelectedEvents() void
+  +getView() EventListView
+}
+
+class GuestController {
+  +run() void
+  +addGuest(Guest guest) void
+  +deleteSelectedGuests() void
+  +getView() GuestView
+}
+
+class HomeView
+class NewEventView
+class EventListView
+class GuestView
+
+class SchedulerEvent
+class Guest
+class SchedulerIO
+class GuestIO
+class SchedulerUtil
+class Frequency {
+  <<enumeration>>
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+Main --> HomeController
+
+Controller <|-- HomeController
+Controller <|-- NewEventController
+Controller <|-- EventListController
+Controller <|-- GuestController
+
+View <|.. HomeView
+View <|.. NewEventView
+View <|.. EventListView
+View <|.. GuestView
+
+Model <|.. SchedulerIO
+Model <|.. GuestIO
+
+HomeController o-- HomeView
+HomeController o-- EventListController
+HomeController o-- NewEventController
+HomeController o-- GuestController
+
+NewEventController --> SchedulerEvent
+NewEventController --> SchedulerIO
+EventListController --> SchedulerIO
+GuestController --> Guest
+GuestController --> GuestIO
+GuestController --> SchedulerIO
+NewEventView --> SchedulerUtil
+SchedulerEvent --> Frequency
