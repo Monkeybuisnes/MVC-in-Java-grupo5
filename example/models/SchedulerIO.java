@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -110,5 +111,65 @@ public class SchedulerIO implements Model
 		}
 		
 		return response;
+	}
+
+	/**
+	 * Deletes events by their line indexes in {@link #FILE}.
+	 * 
+	 * @param indexes List of indexes to remove
+	 * @throws Exception If it can't rewrite event file
+	 */
+	public void deleteEventsByIndexes(List<Integer> indexes) throws Exception
+	{
+		if ((indexes == null) || indexes.isEmpty()) {
+			return;
+		}
+
+		List<String> lines = new ArrayList<>();
+		File eventsFile = new File(DIRECTORY, FILE);
+
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(eventsFile));
+			String line = reader.readLine();
+
+			while (line != null) {
+				lines.add(line);
+				line = reader.readLine();
+			}
+
+			reader.close();
+		} catch (FileNotFoundException fnfe) {
+			notice = "File not found";
+			notifyViews();
+			return;
+		} catch (Exception ex) {
+			notice = "There was a problem reading the event file";
+			notifyViews();
+			return;
+		}
+
+		Collections.sort(indexes, Collections.reverseOrder());
+		for (Integer index : indexes) {
+			if ((index != null) && (index >= 0) && (index < lines.size())) {
+				lines.remove((int) index);
+			}
+		}
+
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(eventsFile, false));
+
+			for (String line : lines) {
+				writer.write(line, 0, line.length());
+				writer.newLine();
+			}
+
+			writer.close();
+		} catch (FileNotFoundException fnfe) {
+			notice = "File not found";
+			notifyViews();
+		} catch (Exception ex) {
+			notice = "Error while writing the file";
+			notifyViews();
+		}
 	}
 }

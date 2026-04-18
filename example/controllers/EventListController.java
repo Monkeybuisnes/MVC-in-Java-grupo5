@@ -1,6 +1,10 @@
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Vector;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
@@ -39,6 +43,42 @@ public class EventListController extends Controller
 	public void addNewRow(Object[] values) 
 	{
 		((DefaultTableModel) table.getModel()).addRow(values);
+	}
+
+	/**
+	 * Deletes selected events from table and persistence.
+	 */
+	public void deleteSelectedEvents()
+	{
+		int[] selectedRows = table.getSelectedRows();
+
+		if ((selectedRows == null) || (selectedRows.length == 0)) {
+			JOptionPane.showMessageDialog(eventListView, "Select at least one event to delete.");
+			return;
+		}
+
+		List<Integer> rowsToDelete = new ArrayList<>();
+
+		for (int row : selectedRows) {
+			rowsToDelete.add(row);
+		}
+
+		Collections.sort(rowsToDelete, Collections.reverseOrder());
+
+		try {
+			SchedulerIO schedulerIO = new SchedulerIO();
+			schedulerIO.attach(eventListView);
+			schedulerIO.deleteEventsByIndexes(rowsToDelete);
+
+			DefaultTableModel model = (DefaultTableModel) table.getModel();
+			for (int row : rowsToDelete) {
+				if ((row >= 0) && (row < model.getRowCount())) {
+					model.removeRow(row);
+				}
+			}
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(eventListView, "Error while deleting event(s)", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	
@@ -84,7 +124,6 @@ public class EventListController extends Controller
 
 		try {
 			SchedulerIO schedulerIO = new SchedulerIO();
-			schedulerIO.attach(eventListView);
 			dataColumns = schedulerIO.getEvents();
 		} catch (Exception ex) { }
 
